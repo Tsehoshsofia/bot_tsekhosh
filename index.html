@@ -7,11 +7,11 @@
     <style>
         /* Классическая деловая палитра */
         :root {
-            --bg-page: #f4f6f8; /* Строгий светло-серый с теплым оттенком */
+            --bg-page: #f4f6f8; 
             --chat-bg: #ffffff;
-            --text-main: #1e293b; /* Темно-серый, почти черный */
+            --text-main: #1e293b; 
             --text-muted: #64748b;
-            --accent-blue: #2563eb; /* Деловой синий */
+            --accent-blue: #2563eb; 
             --accent-hover: #1d4ed8;
             --border-color: #e2e8f0;
         }
@@ -27,14 +27,15 @@
             background-image: linear-gradient(180deg, #fdfbfb 0%, #ebedee 100%);
         }
 
-        /* Контейнер чата - строгая карточка */
+        /* Контейнер чата - сделали больше и шире */
         #chat-container {
-            width: 100%;
-            max-width: 480px;
-            height: 680px;
+            width: 95%; /* Занимает почти всю ширину на телефонах */
+            max-width: 800px; /* Но на ПК не растягивается больше 800px */
+            height: 90vh; /* Почти вся высота экрана */
+            max-height: 850px;
             background: var(--chat-bg);
-            border-radius: 8px; /* Строгие углы */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.04);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -45,19 +46,19 @@
         #chat-header {
             background: #ffffff;
             color: var(--text-main);
-            padding: 18px 20px;
+            padding: 20px 25px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 18px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         /* Индикатор статуса онлайн */
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: #10b981;
             border-radius: 50%;
             display: inline-block;
@@ -66,25 +67,25 @@
         /* Область сообщений */
         #chat-box {
             flex: 1;
-            padding: 20px;
+            padding: 25px;
             overflow-y: auto;
             background: #f8fafc;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
         }
 
-        #chat-box::-webkit-scrollbar { width: 6px; }
+        #chat-box::-webkit-scrollbar { width: 8px; }
         #chat-box::-webkit-scrollbar-track { background: transparent; }
-        #chat-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        #chat-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         /* Сообщения */
         .message {
             max-width: 85%;
-            padding: 14px 16px;
-            border-radius: 6px; /* Строгие углы */
-            font-size: 14px;
-            line-height: 1.6;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-size: 16px; /* Увеличили шрифт */
+            line-height: 1.5;
             word-wrap: break-word;
             animation: fadeIn 0.3s ease-out;
         }
@@ -100,7 +101,7 @@
             color: var(--text-main);
             align-self: flex-start;
             border: 1px solid var(--border-color);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         /* Сообщение пользователя */
@@ -112,22 +113,22 @@
 
         /* Блок кнопок */
         #buttons-container {
-            padding: 16px 20px;
+            padding: 20px 25px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             background: #ffffff;
             border-top: 1px solid var(--border-color);
         }
 
         /* Стили кнопок */
         .chat-btn {
-            padding: 12px 16px;
+            padding: 14px 20px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 8px;
             background: #ffffff;
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
             cursor: pointer;
             text-align: left;
@@ -167,10 +168,10 @@
         /* Стилизация кода в тексте */
         code {
             background-color: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-family: Consolas, Monaco, monospace;
-            font-size: 13px;
+            font-size: 15px;
             color: #b91c1c;
             border: 1px solid #e2e8f0;
         }
@@ -211,8 +212,9 @@
         { q: "Какой метод удалит пробелы в начале и в конце строки?", opts: ["split()", "strip()", "replace()"], correct: 1, exp: "Метод strip() обрезает пробельные символы с обоих концов." }
     ];
 
-    let state = 'registration_age';
-    let userData = { age: null, gender: null, status: null, score: 0 };
+    // Убрали регистрацию, начинаем сразу с меню
+    let state = 'menu'; 
+    let userData = { score: 0 };
     let quizIdx = 0;
 
     const chatBox = document.getElementById('chat-box');
@@ -252,76 +254,61 @@
         addMessage(text, 'user');
         btnContainer.innerHTML = ''; 
 
-        setTimeout(() => {
-            if (state === 'registration_age') {
-                userData.age = text;
-                state = 'registration_gender';
-                addMessage(`Принято. Укажите ваш пол для корректного обращения:`);
-                renderButtons([{text: "Мужской", value: "М"}, {text: "Женский", value: "Ж"}]);
-            } 
-            else if (state === 'registration_gender') {
-                userData.gender = value;
-                state = 'registration_status';
-                addMessage("Выберите ваш текущий статус в системе образования:");
-                renderButtons([{text: "Студент 1 курса", value: "Студент"}, {text: "Преподаватель", value: "Преподаватель"}]);
-            }
-            else if (state === 'registration_status') {
-                userData.status = value;
-                addMessage(value === 'Преподаватель' ? "Здравствуйте! Готова помочь вам с проверкой знаний студентов." : "Отлично! Начнем изучение Python. Выберите действие:");
+        // Убрали задержку setTimeout для мгновенного отклика
+        if (value === 'menu') {
+            addMessage("Возврат в главное меню.");
+            showMainMenu();
+        }
+        else if (value === 'presentations') {
+            state = 'presentations_menu';
+            addMessage("Доступные темы для изучения:");
+            let btns = Object.keys(PRESENTATIONS).map(k => ({text: `${k}. ${PRESENTATIONS[k].title}`, value: `pres_${k}`}));
+            btns.push({text: "⬅️ Вернуться в меню", value: "menu", primary: true});
+            renderButtons(btns);
+        }
+        else if (value.startsWith('pres_')) {
+            const id = value.split('_')[1];
+            let linkHtml = PRESENTATIONS[id].url === "#" 
+                ? "<i>(Материал находится в разработке)</i>" 
+                : `<br><br><a href="${PRESENTATIONS[id].url}" target="_blank">📄 Скачать презентацию (PDF)</a>`;
+            
+            addMessage(`Тема: <b>${PRESENTATIONS[id].title}</b>.${linkHtml}`);
+            renderButtons([{text: "⬅️ Назад к темам", value: "presentations"}]);
+        }
+        else if (value === 'start_quiz') {
+            state = 'quiz';
+            quizIdx = 0;
+            userData.score = 0;
+            askQuiz();
+        }
+        else if (state === 'quiz') {
+            // Проверяем, что нажата кнопка с ответом (число)
+            if (isNaN(parseInt(value))) return; 
+
+            const isCorrect = parseInt(value) === QUIZ[quizIdx].correct;
+            if (isCorrect) userData.score++;
+            
+            addMessage(isCorrect ? `✅ Верно. ${QUIZ[quizIdx].exp}` : `❌ Ошибка. ${QUIZ[quizIdx].exp}`);
+            quizIdx++;
+            
+            if (quizIdx >= QUIZ.length) {
+                addMessage(`Тестирование завершено. Ваш результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
                 showMainMenu();
+            } else {
+                askQuiz(); // Сразу задаем следующий вопрос
             }
-            else if (value === 'menu') {
-                addMessage("Возврат в главное меню.");
-                showMainMenu();
-            }
-            else if (value === 'presentations') {
-                state = 'presentations_menu';
-                addMessage("Доступные темы для изучения:");
-                let btns = Object.keys(PRESENTATIONS).map(k => ({text: `${k}. ${PRESENTATIONS[k].title}`, value: `pres_${k}`}));
-                btns.push({text: "⬅️ Вернуться в меню", value: "menu", primary: true});
-                renderButtons(btns);
-            }
-            else if (value.startsWith('pres_')) {
-                const id = value.split('_')[1];
-                let linkHtml = PRESENTATIONS[id].url === "#" 
-                    ? "<i>(Материал находится в разработке)</i>" 
-                    : `<br><br><a href="${PRESENTATIONS[id].url}" target="_blank">📄 Скачать презентацию (PDF)</a>`;
-                
-                addMessage(`Тема: <b>${PRESENTATIONS[id].title}</b>.${linkHtml}`);
-                renderButtons([{text: "⬅️ Назад к темам", value: "presentations"}]);
-            }
-            else if (value === 'start_quiz') {
-                state = 'quiz';
-                quizIdx = 0;
-                userData.score = 0;
-                askQuiz();
-            }
-            else if (state === 'quiz') {
-                const isCorrect = parseInt(value) === QUIZ[quizIdx].correct;
-                if (isCorrect) userData.score++;
-                
-                addMessage(isCorrect ? `✅ Верно. ${QUIZ[quizIdx].exp}` : `❌ Ошибка. ${QUIZ[quizIdx].exp}`);
-                quizIdx++;
-                
-                if (quizIdx >= QUIZ.length) {
-                    addMessage(`Тестирование завершено. Ваш результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
-                    showMainMenu();
-                } else {
-                    setTimeout(askQuiz, 1000); 
-                }
-            }
-            else if (value === 'start_quest') {
-                addMessage("⚠️ <b>Внимание:</b> В квесте нельзя ошибаться. Одна ошибка — и вы начинаете заново!");
-                addMessage(`Для прохождения интерактивного кейса перейдите по ссылке:<br><br><a href="${QUEST_LINK}" target="_blank" style="font-size:15px;">🎮 Открыть квест</a>`);
-                renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
-            }
-            else if (value === 'analytics') {
-                addMessage(`📊 <b>Статистика:</b><br>Правильных ответов: ${userData.score}<br>Статус: ${userData.status}`);
-                const percent = (userData.score / QUIZ.length) * 100;
-                addMessage(`<div style="background:#e2e8f0; border-radius:4px; width:100%; height:8px; margin-top:5px;"><div style="background:var(--accent-blue); width:${percent}%; height:100%; border-radius:4px; transition: width 1s;"></div></div>`);
-                renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
-            }
-        }, 500); 
+        }
+        else if (value === 'start_quest') {
+            addMessage("⚠️ <b>Внимание:</b> В квесте нельзя ошибаться. Одна ошибка — и вы начинаете заново!");
+            addMessage(`Для прохождения интерактивного кейса перейдите по ссылке:<br><br><a href="${QUEST_LINK}" target="_blank" style="font-size:16px;">🎮 Открыть квест</a>`);
+            renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
+        }
+        else if (value === 'analytics') {
+            addMessage(`📊 <b>Статистика:</b><br>Правильных ответов в тесте: ${userData.score}`);
+            const percent = (userData.score / QUIZ.length) * 100;
+            addMessage(`<div style="background:#e2e8f0; border-radius:4px; width:100%; height:8px; margin-top:5px;"><div style="background:var(--accent-blue); width:${percent}%; height:100%; border-radius:4px; transition: width 1s;"></div></div>`);
+            renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
+        }
     }
 
     function askQuiz() {
@@ -331,8 +318,8 @@
 
     // --- СТАРТ ---
     window.onload = () => {
-        addMessage("Здравствуйте. Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>. Я помогу тебе разобраться с типами данных в Python.<br><br>Для начала авторизации, укажите ваш возраст:");
-        renderButtons([{text: "17", value: "17"}, {text: "18", value: "18"}, {text: "19", value: "19"}]);
+        addMessage("Здравствуйте. Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>. Я помогу тебе разобраться с типами данных в Python.<br><br>С чего начнем?");
+        showMainMenu();
     };
 </script>
 </body>
