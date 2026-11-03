@@ -3,56 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>София - Твой помощник по Python</title>
+    <title>София - Основы программирования</title>
     <style>
-        /* Цветовая палитра и базовые настройки */
+        /* Классическая деловая палитра */
         :root {
-            --bg-color: #fcf8f5; /* Нежный бежевый фон */
+            --bg-page: #f4f6f8; /* Строгий светло-серый с теплым оттенком */
             --chat-bg: #ffffff;
-            --text-main: #333333;
-            --btn-blue: #3b82f6; /* Синий цвет кнопки как на скриншоте */
-            --btn-hover: #2563eb;
-            --bot-msg-bg: #ffffff;
-            --user-msg-bg: #3b82f6;
+            --text-main: #1e293b; /* Темно-серый, почти черный */
+            --text-muted: #64748b;
+            --accent-blue: #2563eb; /* Деловой синий */
+            --accent-hover: #1d4ed8;
+            --border-color: #e2e8f0;
         }
 
         body {
-            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            /* Легкий градиент, как на фоне картинки */
-            background-image: linear-gradient(135deg, #fdfbfb 0%, #f4e8df 100%);
+            background-image: linear-gradient(180deg, #fdfbfb 0%, #ebedee 100%);
         }
 
-        /* Контейнер чата в виде карточки */
+        /* Контейнер чата - строгая карточка */
         #chat-container {
             width: 100%;
-            max-width: 420px;
-            height: 650px;
+            max-width: 480px;
+            height: 680px;
             background: var(--chat-bg);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 8px; /* Строгие углы */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-color);
         }
 
-        /* Шапка чата */
+        /* Шапка */
         #chat-header {
             background: #ffffff;
-            color: #2c3e50;
-            padding: 20px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 18px;
-            border-bottom: 1px solid #f0f0f0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-            z-index: 10;
+            color: var(--text-main);
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Индикатор статуса онлайн */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
         }
 
         /* Область сообщений */
@@ -60,118 +68,126 @@
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background: #f9fafb;
+            background: #f8fafc;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            scroll-behavior: smooth;
+            gap: 16px;
         }
 
-        /* Стилизация скроллбара */
         #chat-box::-webkit-scrollbar { width: 6px; }
         #chat-box::-webkit-scrollbar-track { background: transparent; }
-        #chat-box::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        #chat-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         /* Сообщения */
         .message {
             max-width: 85%;
-            padding: 12px 18px;
-            border-radius: 18px;
-            font-size: 15px;
-            line-height: 1.5;
+            padding: 14px 16px;
+            border-radius: 6px; /* Строгие углы */
+            font-size: 14px;
+            line-height: 1.6;
             word-wrap: break-word;
-            animation: slideUp 0.3s ease-out;
-            position: relative;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        /* Сообщение от Софии (Бота) */
+        /* Сообщение бота */
         .msg-bot {
-            background: var(--bot-msg-bg);
+            background: #ffffff;
             color: var(--text-main);
             align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            border: 1px solid #f0f0f0;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
-        /* Сообщение от Пользователя */
+        /* Сообщение пользователя */
         .msg-user {
-            background: var(--user-msg-bg);
+            background: var(--accent-blue);
             color: #ffffff;
             align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
-        /* Кнопки */
+        /* Блок кнопок */
         #buttons-container {
-            padding: 15px 20px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
             background: #ffffff;
-            border-top: 1px solid #f0f0f0;
+            border-top: 1px solid var(--border-color);
         }
 
+        /* Стили кнопок */
         .chat-btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 12px;
-            background: #f3f4f6;
-            color: #1f2937;
-            font-size: 15px;
-            font-weight: 600;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #ffffff;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            text-align: center; /* Выравнивание по центру для аккуратности */
-            transition: all 0.2s ease;
+            text-align: left;
+            transition: all 0.15s ease;
+            font-family: inherit;
         }
 
         .chat-btn:hover {
-            background: #e5e7eb;
-            transform: translateY(-1px);
+            background: #f1f5f9;
+            border-color: #cbd5e1;
         }
 
-        /* Главная кнопка (синяя) */
+        /* Главная (синяя) кнопка */
         .chat-btn.primary {
-            background: var(--btn-blue);
-            color: white;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            background: var(--accent-blue);
+            color: #ffffff;
+            border-color: var(--accent-blue);
+            text-align: center;
+            font-weight: 600;
         }
 
         .chat-btn.primary:hover {
-            background: var(--btn-hover);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
         }
 
-        /* Ссылки внутри сообщений */
+        /* Ссылки */
         a {
-            color: var(--btn-blue);
-            font-weight: 700;
+            color: var(--accent-blue);
+            font-weight: 600;
             text-decoration: none;
-            border-bottom: 1px dashed var(--btn-blue);
-            transition: 0.2s;
         }
         a:hover {
-            color: var(--btn-hover);
-            border-bottom-style: solid;
+            text-decoration: underline;
+        }
+
+        /* Стилизация кода в тексте */
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #b91c1c;
+            border: 1px solid #e2e8f0;
         }
     </style>
 </head>
 <body>
 
 <div id="chat-container">
-    <div id="chat-header">София — ваш помощник</div>
+    <div id="chat-header">
+        <span class="status-dot"></span> София | Преподаватель Python
+    </div>
     <div id="chat-box"></div>
     <div id="buttons-container"></div>
 </div>
 
 <script>
-    // --- БАЗА ССЫЛОК НА ПРЕЗЕНТАЦИИ ---
+    // --- БАЗА ССЫЛОК ---
     const BASE_URL = "https://github.com/Tsehoshsofia/bot_tsekhosh/blob/main/";
     
     const PRESENTATIONS = {
@@ -187,7 +203,6 @@
         "10": { title: "Работа с файлами", url: BASE_URL + "Работа_с_файлами.pdf" }
     };
 
-    // Твоя ссылка на квест в Тильде
     const QUEST_LINK = "https://project12909115.tilda.ws/page155362456.html";
 
     const QUIZ = [
@@ -208,7 +223,6 @@
         div.className = `message msg-${sender}`;
         div.innerHTML = text;
         chatBox.appendChild(div);
-        // Плавный скролл вниз
         setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
     }
 
@@ -225,12 +239,12 @@
 
     function showMainMenu() {
         state = 'menu';
-        addMessage("Чем займемся? Выбери раздел:");
+        addMessage("Выберите необходимый раздел для продолжения работы:");
         renderButtons([
-            { text: "📚 Презентации", value: "presentations" },
-            { text: "📝 Тестирование", value: "start_quiz", primary: true },
-            { text: "🎮 Квест", value: "start_quest" },
-            { text: "📊 Аналитика", value: "analytics" }
+            { text: "📚 Методические материалы", value: "presentations" },
+            { text: "📝 Пройти тестирование", value: "start_quiz", primary: true },
+            { text: "🎮 Перейти к квесту", value: "start_quest" },
+            { text: "📊 Моя статистика", value: "analytics" }
         ]);
     }
 
@@ -238,41 +252,40 @@
         addMessage(text, 'user');
         btnContainer.innerHTML = ''; 
 
-        // Небольшая задержка для эффекта "печати" Софией
         setTimeout(() => {
             if (state === 'registration_age') {
                 userData.age = text;
                 state = 'registration_gender';
-                addMessage(`Принято! ${text} лет — отличный возраст для старта. Твой пол (М/Ж)?`);
+                addMessage(`Принято. Укажите ваш пол для корректного обращения:`);
                 renderButtons([{text: "Мужской", value: "М"}, {text: "Женский", value: "Ж"}]);
             } 
             else if (state === 'registration_gender') {
                 userData.gender = value;
                 state = 'registration_status';
-                addMessage("Супер! А теперь выбери свой статус:");
-                renderButtons([{text: "🎓 Студент 1 курса", value: "Студент"}, {text: "👨‍🏫 Преподаватель", value: "Преподаватель"}]);
+                addMessage("Выберите ваш текущий статус в системе образования:");
+                renderButtons([{text: "Студент 1 курса", value: "Студент"}, {text: "Преподаватель", value: "Преподаватель"}]);
             }
             else if (state === 'registration_status') {
                 userData.status = value;
-                addMessage(value === 'Преподаватель' ? "Здравствуйте! Готова помочь вам с проверкой знаний." : "Привет, первокурсник! Вместе мы прокачаем Python. С чего начнем?");
+                addMessage(value === 'Преподаватель' ? "Здравствуйте! Готова помочь вам с проверкой знаний студентов." : "Отлично! Начнем изучение Python. Выберите действие:");
                 showMainMenu();
             }
             else if (value === 'menu') {
-                addMessage("Возвращаемся в главное меню.");
+                addMessage("Возврат в главное меню.");
                 showMainMenu();
             }
             else if (value === 'presentations') {
                 state = 'presentations_menu';
-                addMessage("Выбери тему презентации:");
+                addMessage("Доступные темы для изучения:");
                 let btns = Object.keys(PRESENTATIONS).map(k => ({text: `${k}. ${PRESENTATIONS[k].title}`, value: `pres_${k}`}));
-                btns.push({text: "⬅️ Назад", value: "menu", primary: true});
+                btns.push({text: "⬅️ Вернуться в меню", value: "menu", primary: true});
                 renderButtons(btns);
             }
             else if (value.startsWith('pres_')) {
                 const id = value.split('_')[1];
                 let linkHtml = PRESENTATIONS[id].url === "#" 
-                    ? "<i>(Файл для этой темы еще готовится)</i>" 
-                    : `<br><br><a href="${PRESENTATIONS[id].url}" target="_blank">📥 Открыть презентацию</a>`;
+                    ? "<i>(Материал находится в разработке)</i>" 
+                    : `<br><br><a href="${PRESENTATIONS[id].url}" target="_blank">📄 Скачать презентацию (PDF)</a>`;
                 
                 addMessage(`Тема: <b>${PRESENTATIONS[id].title}</b>.${linkHtml}`);
                 renderButtons([{text: "⬅️ Назад к темам", value: "presentations"}]);
@@ -287,38 +300,38 @@
                 const isCorrect = parseInt(value) === QUIZ[quizIdx].correct;
                 if (isCorrect) userData.score++;
                 
-                addMessage(isCorrect ? `✅ Верно! ${QUIZ[quizIdx].exp}` : `❌ Ошибка. ${QUIZ[quizIdx].exp}`);
+                addMessage(isCorrect ? `✅ Верно. ${QUIZ[quizIdx].exp}` : `❌ Ошибка. ${QUIZ[quizIdx].exp}`);
                 quizIdx++;
                 
                 if (quizIdx >= QUIZ.length) {
-                    addMessage(`🏁 Тест завершен! Твой результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
+                    addMessage(`Тестирование завершено. Ваш результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
                     showMainMenu();
                 } else {
                     setTimeout(askQuiz, 1000); 
                 }
             }
             else if (value === 'start_quest') {
-                addMessage("⚠️ Внимание! В квесте нельзя ошибаться. Одна ошибка — и ты начинаешь заново!");
-                addMessage(`Переходи по ссылке, чтобы пройти полный квест:<br><br><a href="${QUEST_LINK}" target="_blank" style="font-size:16px;">🎮 Начать квест</a>`);
+                addMessage("⚠️ <b>Внимание:</b> В квесте нельзя ошибаться. Одна ошибка — и вы начинаете заново!");
+                addMessage(`Для прохождения интерактивного кейса перейдите по ссылке:<br><br><a href="${QUEST_LINK}" target="_blank" style="font-size:15px;">🎮 Открыть квест</a>`);
                 renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
             }
             else if (value === 'analytics') {
-                addMessage(`📊 Твоя аналитика:<br>Правильных ответов в тесте: <b>${userData.score}</b><br>Статус: ${userData.status}`);
+                addMessage(`📊 <b>Статистика:</b><br>Правильных ответов: ${userData.score}<br>Статус: ${userData.status}`);
                 const percent = (userData.score / QUIZ.length) * 100;
-                addMessage(`<div style="background:#e5e7eb; border-radius:10px; width:100%; height:12px; margin-top:5px;"><div style="background:var(--btn-blue); width:${percent}%; height:100%; border-radius:10px; transition: width 1s;"></div></div>`);
+                addMessage(`<div style="background:#e2e8f0; border-radius:4px; width:100%; height:8px; margin-top:5px;"><div style="background:var(--accent-blue); width:${percent}%; height:100%; border-radius:4px; transition: width 1s;"></div></div>`);
                 renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
             }
-        }, 600); // Задержка 0.6 сек
+        }, 500); 
     }
 
     function askQuiz() {
-        addMessage(`<b>Вопрос ${quizIdx + 1}:</b><br>${QUIZ[quizIdx].q}`);
+        addMessage(`<b>Вопрос ${quizIdx + 1} из ${QUIZ.length}:</b><br><br>${QUIZ[quizIdx].q}`);
         renderButtons(QUIZ[quizIdx].opts.map((opt, i) => ({text: opt, value: i})));
     }
 
-    // --- СТАРТ БОТА ---
+    // --- СТАРТ ---
     window.onload = () => {
-        addMessage("Здравствуйте! Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>. Я помогу тебе разобраться с Python.<br><br>Давай познакомимся. Сколько тебе лет?");
+        addMessage("Здравствуйте. Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>. Я помогу тебе разобраться с типами данных в Python.<br><br>Для начала авторизации, укажите ваш возраст:");
         renderButtons([{text: "17", value: "17"}, {text: "18", value: "18"}, {text: "19", value: "19"}]);
     };
 </script>
