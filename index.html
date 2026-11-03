@@ -5,130 +5,211 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>София - Твой помощник по Python</title>
     <style>
+        /* Цветовая палитра и базовые настройки */
+        :root {
+            --bg-color: #fcf8f5; /* Нежный бежевый фон */
+            --chat-bg: #ffffff;
+            --text-main: #333333;
+            --btn-blue: #3b82f6; /* Синий цвет кнопки как на скриншоте */
+            --btn-hover: #2563eb;
+            --bot-msg-bg: #ffffff;
+            --user-msg-bg: #3b82f6;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            /* Легкий градиент, как на фоне картинки */
+            background-image: linear-gradient(135deg, #fdfbfb 0%, #f4e8df 100%);
         }
+
+        /* Контейнер чата в виде карточки */
         #chat-container {
             width: 100%;
-            max-width: 400px;
-            height: 600px;
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 420px;
+            height: 650px;
+            background: var(--chat-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
+
+        /* Шапка чата */
         #chat-header {
-            background: #2c3e50;
-            color: white;
-            padding: 15px;
+            background: #ffffff;
+            color: #2c3e50;
+            padding: 20px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 18px;
+            border-bottom: 1px solid #f0f0f0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            z-index: 10;
         }
+
+        /* Область сообщений */
         #chat-box {
             flex: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
-            background: #eef2f5;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        /* Стилизация скроллбара */
+        #chat-box::-webkit-scrollbar { width: 6px; }
+        #chat-box::-webkit-scrollbar-track { background: transparent; }
+        #chat-box::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+        /* Сообщения */
+        .message {
+            max-width: 85%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            animation: slideUp 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Сообщение от Софии (Бота) */
+        .msg-bot {
+            background: var(--bot-msg-bg);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f0f0f0;
+        }
+
+        /* Сообщение от Пользователя */
+        .msg-user {
+            background: var(--user-msg-bg);
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Кнопки */
+        #buttons-container {
+            padding: 15px 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            background: #ffffff;
+            border-top: 1px solid #f0f0f0;
         }
-        .message {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            font-size: 14px;
-            line-height: 1.4;
-            word-wrap: break-word;
-            animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .msg-bot { background: #fff; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .msg-user { background: #3498db; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        #buttons-container {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            background: #fff;
-        }
+
         .chat-btn {
-            padding: 12px;
+            padding: 14px 20px;
             border: none;
-            border-radius: 8px;
-            background: #ecf0f1;
-            color: #2c3e50;
-            font-size: 14px;
+            border-radius: 12px;
+            background: #f3f4f6;
+            color: #1f2937;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            text-align: left;
-            transition: background 0.2s;
-            border-left: 4px solid #3498db;
+            text-align: center; /* Выравнивание по центру для аккуратности */
+            transition: all 0.2s ease;
         }
-        .chat-btn:hover { background: #d5dbdb; }
-        .chat-btn.primary { background: #3498db; color: white; border-left: none; text-align: center; font-weight: bold; }
-        .chat-btn.primary:hover { background: #2980b9; }
+
+        .chat-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        /* Главная кнопка (синяя) */
+        .chat-btn.primary {
+            background: var(--btn-blue);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .chat-btn.primary:hover {
+            background: var(--btn-hover);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Ссылки внутри сообщений */
+        a {
+            color: var(--btn-blue);
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 1px dashed var(--btn-blue);
+            transition: 0.2s;
+        }
+        a:hover {
+            color: var(--btn-hover);
+            border-bottom-style: solid;
+        }
     </style>
 </head>
 <body>
 
 <div id="chat-container">
-    <div id="chat-header">👩‍💻 София — Python Helper</div>
+    <div id="chat-header">София — ваш помощник</div>
     <div id="chat-box"></div>
     <div id="buttons-container"></div>
 </div>
 
 <script>
-    // --- ДАННЫЕ БОТА ---
+    // --- БАЗА ССЫЛОК НА ПРЕЗЕНТАЦИИ ---
+    const BASE_URL = "https://github.com/Tsehoshsofia/bot_tsekhosh/blob/main/";
+    
     const PRESENTATIONS = {
-        "1": { title: "Введение в программирование", url: "#" },
+        "1": { title: "Введение и типы переменных", url: BASE_URL + "Типы_переменных.pdf" },
         "2": { title: "Работа с числовыми данными", url: "#" },
-        "3": { title: "Работа с текстовыми данными", url: "#" },
-        "4": { title: "Условный оператор", url: "#" },
+        "3": { title: "Работа с текстовыми данными", url: BASE_URL + "Основные_методы_работы.pdf" },
+        "4": { title: "Условный оператор", url: BASE_URL + "Условные_операторы.pdf" },
         "5": { title: "Циклы", url: "#" },
-        "6": { title: "Множества", url: "#" },
+        "6": { title: "Множества", url: BASE_URL + "Множества.pdf" },
         "7": { title: "Строки и символы", url: "#" },
-        "8": { title: "Списки", url: "#" },
-        "9": { title: "Библиотеки и функции", url: "#" },
-        "10": { title: "Работа с таблицами", url: "#" }
+        "8": { title: "Списки", url: BASE_URL + "Списки.pdf" },
+        "9": { title: "Библиотеки и функции", url: BASE_URL + "Библиотеки_Python.pdf" },
+        "10": { title: "Работа с файлами", url: BASE_URL + "Работа_с_файлами.pdf" }
     };
 
+    // Твоя ссылка на квест в Тильде
+    const QUEST_LINK = "https://project12909115.tilda.ws/page155362456.html";
+
     const QUIZ = [
-        { q: "Что выведет код: print([10, 20, 30, 40][1:3])?", opts: ["[10, 20]", "[20, 30]", "[20, 30, 40]"], correct: 1, exp: "Срез [1:3] берет элементы с индексом 1 до 2, не включая 3." },
-        { q: "Какой тип данных у результата: input('Введите число')?", opts: ["int", "str", "float"], correct: 1, exp: "Функция input() всегда возвращает строку (str), даже если введено число." },
+        { q: "Что выведет код: <code>print([10, 20, 30, 40][1:3])</code>?", opts: ["[10, 20]", "[20, 30]", "[20, 30, 40]"], correct: 1, exp: "Срез [1:3] берет элементы с индексом 1 до 2, не включая 3." },
+        { q: "Какой тип данных у результата: <code>input('Введите число')</code>?", opts: ["int", "str", "float"], correct: 1, exp: "Функция input() всегда возвращает строку (str), даже если введено число." },
         { q: "Какой метод удалит пробелы в начале и в конце строки?", opts: ["split()", "strip()", "replace()"], correct: 1, exp: "Метод strip() обрезает пробельные символы с обоих концов." }
     ];
 
-    const QUEST = [
-        { q: "Шаг 1. Как объявить переменную с числом 55?", opts: ["55 = num", "num = 55", "int num = 55"], correct: 1 },
-        { q: "Шаг 2. Что вернет: {1, 2, 3} & {2, 3, 4}?", opts: ["{1, 2, 3, 4}", "{2, 3}", "{1, 4}"], correct: 1 },
-        { q: "Шаг 3. Каким будет результат 10 / 3?", opts: ["3.33", "3", "Ошибка"], correct: 0 }
-    ];
-
-    // --- СОСТОЯНИЕ ---
     let state = 'registration_age';
-    let userData = { age: null, gender: null, status: null, score: 0, questIdx: 0 };
+    let userData = { age: null, gender: null, status: null, score: 0 };
     let quizIdx = 0;
 
-    // --- DOM ЭЛЕМЕНТЫ ---
     const chatBox = document.getElementById('chat-box');
     const btnContainer = document.getElementById('buttons-container');
 
-    // --- ФУНКЦИИ ---
     function addMessage(text, sender = 'bot') {
         const div = document.createElement('div');
         div.className = `message msg-${sender}`;
         div.innerHTML = text;
         chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        // Плавный скролл вниз
+        setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
     }
 
     function renderButtons(buttons) {
@@ -144,7 +225,7 @@
 
     function showMainMenu() {
         state = 'menu';
-        addMessage("Главное меню. Выбери действие:");
+        addMessage("Чем займемся? Выбери раздел:");
         renderButtons([
             { text: "📚 Презентации", value: "presentations" },
             { text: "📝 Тестирование", value: "start_quiz", primary: true },
@@ -153,13 +234,12 @@
         ]);
     }
 
-    // --- ЛОГИКА ---
     function handleInput(value, text) {
         addMessage(text, 'user');
-        btnContainer.innerHTML = ''; // Скрываем кнопки
+        btnContainer.innerHTML = ''; 
 
+        // Небольшая задержка для эффекта "печати" Софией
         setTimeout(() => {
-            // РЕГИСТРАЦИЯ
             if (state === 'registration_age') {
                 userData.age = text;
                 state = 'registration_gender';
@@ -174,12 +254,11 @@
             }
             else if (state === 'registration_status') {
                 userData.status = value;
-                addMessage(value === 'Преподаватель' ? "Здравствуйте! Готова помочь с проверкой знаний." : "Привет, первокурсник! Вместе мы прокачаем Python. С чего начнем?");
+                addMessage(value === 'Преподаватель' ? "Здравствуйте! Готова помочь вам с проверкой знаний." : "Привет, первокурсник! Вместе мы прокачаем Python. С чего начнем?");
                 showMainMenu();
             }
-            // МЕНЮ
             else if (value === 'menu') {
-                addMessage("Возвращаемся в меню.");
+                addMessage("Возвращаемся в главное меню.");
                 showMainMenu();
             }
             else if (value === 'presentations') {
@@ -191,10 +270,13 @@
             }
             else if (value.startsWith('pres_')) {
                 const id = value.split('_')[1];
-                addMessage(`Тема: ${PRESENTATIONS[id].title}.<br>Ссылка: <a href="${PRESENTATIONS[id].url}" target="_blank">Скачать PDF</a>`);
+                let linkHtml = PRESENTATIONS[id].url === "#" 
+                    ? "<i>(Файл для этой темы еще готовится)</i>" 
+                    : `<br><br><a href="${PRESENTATIONS[id].url}" target="_blank">📥 Открыть презентацию</a>`;
+                
+                addMessage(`Тема: <b>${PRESENTATIONS[id].title}</b>.${linkHtml}`);
                 renderButtons([{text: "⬅️ Назад к темам", value: "presentations"}]);
             }
-            // ТЕСТИРОВАНИЕ
             else if (value === 'start_quiz') {
                 state = 'quiz';
                 quizIdx = 0;
@@ -209,59 +291,34 @@
                 quizIdx++;
                 
                 if (quizIdx >= QUIZ.length) {
-                    addMessage(`🏁 Тест завершен! Твой результат: ${userData.score} из ${QUIZ.length}.`);
+                    addMessage(`🏁 Тест завершен! Твой результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
                     showMainMenu();
                 } else {
-                    setTimeout(askQuiz, 1000); // Небольшая пауза перед след. вопросом
+                    setTimeout(askQuiz, 1000); 
                 }
             }
-            // КВЕСТ (Строгая валидация)
             else if (value === 'start_quest') {
-                state = 'quest';
-                userData.questIdx = 0;
                 addMessage("⚠️ Внимание! В квесте нельзя ошибаться. Одна ошибка — и ты начинаешь заново!");
-                askQuest();
-            }
-            else if (state === 'quest') {
-                const isCorrect = parseInt(value) === QUEST[userData.questIdx].correct;
-                if (isCorrect) {
-                    userData.questIdx++;
-                    if (userData.questIdx >= QUEST.length) {
-                        addMessage("🏆 Поздравляю! Ты прошел квест без ошибок! София гордится тобой!");
-                        showMainMenu();
-                    } else {
-                        askQuest();
-                    }
-                } else {
-                    userData.questIdx = 0;
-                    addMessage("❌ ОШИБКА! Квест начинается заново.");
-                    askQuest();
-                }
-            }
-            // АНАЛИТИКА
-            else if (value === 'analytics') {
-                addMessage(`📊 Твоя аналитика:<br>Правильных ответов в тесте: ${userData.score}<br>Статус: ${userData.status}`);
-                // Визуальный прогресс-бар
-                const percent = (userData.score / QUIZ.length) * 100;
-                addMessage(`<div style="background:#ddd; border-radius:10px; width:100%; height:20px;"><div style="background:#2ecc71; width:${percent}%; height:100%; border-radius:10px;"></div></div>`);
+                addMessage(`Переходи по ссылке, чтобы пройти полный квест:<br><br><a href="${QUEST_LINK}" target="_blank" style="font-size:16px;">🎮 Начать квест</a>`);
                 renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
             }
-        }, 400); // Задержка для эффекта "печати"
+            else if (value === 'analytics') {
+                addMessage(`📊 Твоя аналитика:<br>Правильных ответов в тесте: <b>${userData.score}</b><br>Статус: ${userData.status}`);
+                const percent = (userData.score / QUIZ.length) * 100;
+                addMessage(`<div style="background:#e5e7eb; border-radius:10px; width:100%; height:12px; margin-top:5px;"><div style="background:var(--btn-blue); width:${percent}%; height:100%; border-radius:10px; transition: width 1s;"></div></div>`);
+                renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
+            }
+        }, 600); // Задержка 0.6 сек
     }
 
     function askQuiz() {
-        addMessage(`Вопрос ${quizIdx + 1}:<br>${QUIZ[quizIdx].q}`);
+        addMessage(`<b>Вопрос ${quizIdx + 1}:</b><br>${QUIZ[quizIdx].q}`);
         renderButtons(QUIZ[quizIdx].opts.map((opt, i) => ({text: opt, value: i})));
-    }
-
-    function askQuest() {
-        addMessage(`Вопрос:<br>${QUEST[userData.questIdx].q}`);
-        renderButtons(QUEST[userData.questIdx].opts.map((opt, i) => ({text: opt, value: i})));
     }
 
     // --- СТАРТ БОТА ---
     window.onload = () => {
-        addMessage("Привет! Я София, твой цифровой помощник по Python. Давай познакомимся. Сколько тебе лет?");
+        addMessage("Здравствуйте! Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>. Я помогу тебе разобраться с Python.<br><br>Давай познакомимся. Сколько тебе лет?");
         renderButtons([{text: "17", value: "17"}, {text: "18", value: "18"}, {text: "19", value: "19"}]);
     };
 </script>
