@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>София - Твой помощник по Python</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #chat-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        #chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #eef2f5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-bot { background: #fff; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg-user { background: #3498db; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        #buttons-container {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #fff;
+        }
+        .chat-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+            border-left: 4px solid #3498db;
+        }
+        .chat-btn:hover { background: #d5dbdb; }
+        .chat-btn.primary { background: #3498db; color: white; border-left: none; text-align: center; font-weight: bold; }
+        .chat-btn.primary:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="chat-header">👩‍💻 София — Python Helper</div>
+    <div id="chat-box"></div>
+    <div id="buttons-container"></div>
+</div>
+
+<script>
+    // --- ДАННЫЕ БОТА ---
+    const PRESENTATIONS = {
+        "1": { title: "Введение в программирование", url: "#" },
+        "2": { title: "Работа с числовыми данными", url: "#" },
+        "3": { title: "Работа с текстовыми данными", url: "#" },
+        "4": { title: "Условный оператор", url: "#" },
+        "5": { title: "Циклы", url: "#" },
+        "6": { title: "Множества", url: "#" },
+        "7": { title: "Строки и символы", url: "#" },
+        "8": { title: "Списки", url: "#" },
+        "9": { title: "Библиотеки и функции", url: "#" },
+        "10": { title: "Работа с таблицами", url: "#" }
+    };
+
+    const QUIZ = [
+        { q: "Что выведет код: print([10, 20, 30, 40][1:3])?", opts: ["[10, 20]", "[20, 30]", "[20, 30, 40]"], correct: 1, exp: "Срез [1:3] берет элементы с индексом 1 до 2, не включая 3." },
+        { q: "Какой тип данных у результата: input('Введите число')?", opts: ["int", "str", "float"], correct: 1, exp: "Функция input() всегда возвращает строку (str), даже если введено число." },
+        { q: "Какой метод удалит пробелы в начале и в конце строки?", opts: ["split()", "strip()", "replace()"], correct: 1, exp: "Метод strip() обрезает пробельные символы с обоих концов." }
+    ];
+
+    const QUEST = [
+        { q: "Шаг 1. Как объявить переменную с числом 55?", opts: ["55 = num", "num = 55", "int num = 55"], correct: 1 },
+        { q: "Шаг 2. Что вернет: {1, 2, 3} & {2, 3, 4}?", opts: ["{1, 2, 3, 4}", "{2, 3}", "{1, 4}"], correct: 1 },
+        { q: "Шаг 3. Каким будет результат 10 / 3?", opts: ["3.33", "3", "Ошибка"], correct: 0 }
+    ];
+
+    // --- СОСТОЯНИЕ ---
+    let state = 'registration_age';
+    let userData = { age: null, gender: null, status: null, score: 0, questIdx: 0 };
+    let quizIdx = 0;
+
+    // --- DOM ЭЛЕМЕНТЫ ---
+    const chatBox = document.getElementById('chat-box');
+    const btnContainer = document.getElementById('buttons-container');
+
+    // --- ФУНКЦИИ ---
+    function addMessage(text, sender = 'bot') {
+        const div = document.createElement('div');
+        div.className = `message msg-${sender}`;
+        div.innerHTML = text;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function renderButtons(buttons) {
+        btnContainer.innerHTML = '';
+        buttons.forEach(btn => {
+            const b = document.createElement('button');
+            b.className = btn.primary ? 'chat-btn primary' : 'chat-btn';
+            b.innerText = btn.text;
+            b.onclick = () => handleInput(btn.value, btn.text);
+            btnContainer.appendChild(b);
+        });
+    }
+
+    function showMainMenu() {
+        state = 'menu';
+        addMessage("Главное меню. Выбери действие:");
+        renderButtons([
+            { text: "📚 Презентации", value: "presentations" },
+            { text: "📝 Тестирование", value: "start_quiz", primary: true },
+            { text: "🎮 Квест", value: "start_quest" },
+            { text: "📊 Аналитика", value: "analytics" }
+        ]);
+    }
+
+    // --- ЛОГИКА ---
+    function handleInput(value, text) {
+        addMessage(text, 'user');
+        btnContainer.innerHTML = ''; // Скрываем кнопки
+
+        setTimeout(() => {
+            // РЕГИСТРАЦИЯ
+            if (state === 'registration_age') {
+                userData.age = text;
+                state = 'registration_gender';
+                addMessage(`Принято! ${text} лет — отличный возраст для старта. Твой пол (М/Ж)?`);
+                renderButtons([{text: "Мужской", value: "М"}, {text: "Женский", value: "Ж"}]);
+            } 
+            else if (state === 'registration_gender') {
+                userData.gender = value;
+                state = 'registration_status';
+                addMessage("Супер! А теперь выбери свой статус:");
+                renderButtons([{text: "🎓 Студент 1 курса", value: "Студент"}, {text: "👨‍🏫 Преподаватель", value: "Преподаватель"}]);
+            }
+            else if (state === 'registration_status') {
+                userData.status = value;
+                addMessage(value === 'Преподаватель' ? "Здравствуйте! Готова помочь с проверкой знаний." : "Привет, первокурсник! Вместе мы прокачаем Python. С чего начнем?");
+                showMainMenu();
+            }
+            // МЕНЮ
+            else if (value === 'menu') {
+                addMessage("Возвращаемся в меню.");
+                showMainMenu();
+            }
+            else if (value === 'presentations') {
+                state = 'presentations_menu';
+                addMessage("Выбери тему презентации:");
+                let btns = Object.keys(PRESENTATIONS).map(k => ({text: `${k}. ${PRESENTATIONS[k].title}`, value: `pres_${k}`}));
+                btns.push({text: "⬅️ Назад", value: "menu", primary: true});
+                renderButtons(btns);
+            }
+            else if (value.startsWith('pres_')) {
+                const id = value.split('_')[1];
+                addMessage(`Тема: ${PRESENTATIONS[id].title}.<br>Ссылка: <a href="${PRESENTATIONS[id].url}" target="_blank">Скачать PDF</a>`);
+                renderButtons([{text: "⬅️ Назад к темам", value: "presentations"}]);
+            }
+            // ТЕСТИРОВАНИЕ
+            else if (value === 'start_quiz') {
+                state = 'quiz';
+                quizIdx = 0;
+                userData.score = 0;
+                askQuiz();
+            }
+            else if (state === 'quiz') {
+                const isCorrect = parseInt(value) === QUIZ[quizIdx].correct;
+                if (isCorrect) userData.score++;
+                
+                addMessage(isCorrect ? `✅ Верно! ${QUIZ[quizIdx].exp}` : `❌ Ошибка. ${QUIZ[quizIdx].exp}`);
+                quizIdx++;
+                
+                if (quizIdx >= QUIZ.length) {
+                    addMessage(`🏁 Тест завершен! Твой результат: ${userData.score} из ${QUIZ.length}.`);
+                    showMainMenu();
+                } else {
+                    setTimeout(askQuiz, 1000); // Небольшая пауза перед след. вопросом
+                }
+            }
+            // КВЕСТ (Строгая валидация)
+            else if (value === 'start_quest') {
+                state = 'quest';
+                userData.questIdx = 0;
+                addMessage("⚠️ Внимание! В квесте нельзя ошибаться. Одна ошибка — и ты начинаешь заново!");
+                askQuest();
+            }
+            else if (state === 'quest') {
+                const isCorrect = parseInt(value) === QUEST[userData.questIdx].correct;
+                if (isCorrect) {
+                    userData.questIdx++;
+                    if (userData.questIdx >= QUEST.length) {
+                        addMessage("🏆 Поздравляю! Ты прошел квест без ошибок! София гордится тобой!");
+                        showMainMenu();
+                    } else {
+                        askQuest();
+                    }
+                } else {
+                    userData.questIdx = 0;
+                    addMessage("❌ ОШИБКА! Квест начинается заново.");
+                    askQuest();
+                }
+            }
+            // АНАЛИТИКА
+            else if (value === 'analytics') {
+                addMessage(`📊 Твоя аналитика:<br>Правильных ответов в тесте: ${userData.score}<br>Статус: ${userData.status}`);
+                // Визуальный прогресс-бар
+                const percent = (userData.score / QUIZ.length) * 100;
+                addMessage(`<div style="background:#ddd; border-radius:10px; width:100%; height:20px;"><div style="background:#2ecc71; width:${percent}%; height:100%; border-radius:10px;"></div></div>`);
+                renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
+            }
+        }, 400); // Задержка для эффекта "печати"
+    }
+
+    function askQuiz() {
+        addMessage(`Вопрос ${quizIdx + 1}:<br>${QUIZ[quizIdx].q}`);
+        renderButtons(QUIZ[quizIdx].opts.map((opt, i) => ({text: opt, value: i})));
+    }
+
+    function askQuest() {
+        addMessage(`Вопрос:<br>${QUEST[userData.questIdx].q}`);
+        renderButtons(QUEST[userData.questIdx].opts.map((opt, i) => ({text: opt, value: i})));
+    }
+
+    // --- СТАРТ БОТА ---
+    window.onload = () => {
+        addMessage("Привет! Я София, твой цифровой помощник по Python. Давай познакомимся. Сколько тебе лет?");
+        renderButtons([{text: "17", value: "17"}, {text: "18", value: "18"}, {text: "19", value: "19"}]);
+    };
+</script>
+</body>
+</html>
