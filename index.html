@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>София - Основы программирования</title>
     <style>
         /* Классическая деловая палитра */
@@ -23,15 +23,18 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            height: 100dvh; /* Для мобильных браузеров */
             margin: 0;
             background-image: linear-gradient(180deg, #fdfbfb 0%, #ebedee 100%);
+            overflow: hidden;
         }
 
-        /* Контейнер чата - сделали больше и шире */
+        /* Контейнер чата */
         #chat-container {
-            width: 95%; /* Занимает почти всю ширину на телефонах */
-            max-width: 800px; /* Но на ПК не растягивается больше 800px */
-            height: 90vh; /* Почти вся высота экрана */
+            width: 95%; 
+            max-width: 800px; 
+            height: 90vh; 
+            height: 90dvh;
             max-height: 850px;
             background: var(--chat-bg);
             border-radius: 12px; 
@@ -40,6 +43,7 @@
             flex-direction: column;
             overflow: hidden;
             border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
 
         /* Шапка */
@@ -53,9 +57,9 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            transition: all 0.3s ease;
         }
 
-        /* Индикатор статуса онлайн */
         .status-dot {
             width: 10px;
             height: 10px;
@@ -84,7 +88,7 @@
             max-width: 85%;
             padding: 16px 20px;
             border-radius: 8px;
-            font-size: 16px; /* Увеличили шрифт */
+            font-size: 16px; 
             line-height: 1.5;
             word-wrap: break-word;
             animation: fadeIn 0.3s ease-out;
@@ -95,7 +99,6 @@
             to { opacity: 1; }
         }
 
-        /* Сообщение бота */
         .msg-bot {
             background: #ffffff;
             color: var(--text-main);
@@ -104,7 +107,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        /* Сообщение пользователя */
         .msg-user {
             background: var(--accent-blue);
             color: #ffffff;
@@ -141,7 +143,6 @@
             border-color: #cbd5e1;
         }
 
-        /* Главная (синяя) кнопка */
         .chat-btn.primary {
             background: var(--accent-blue);
             color: #ffffff;
@@ -155,17 +156,25 @@
             border-color: var(--accent-hover);
         }
 
-        /* Ссылки */
+        /* Кнопка прерывания */
+        .chat-btn.danger {
+            color: #ef4444;
+            border-color: #fca5a5;
+            text-align: center;
+            font-size: 14px;
+            padding: 10px;
+        }
+        .chat-btn.danger:hover {
+            background: #fef2f2;
+        }
+
         a {
             color: var(--accent-blue);
             font-weight: 600;
             text-decoration: none;
         }
-        a:hover {
-            text-decoration: underline;
-        }
+        a:hover { text-decoration: underline; }
 
-        /* Стилизация кода в тексте */
         code {
             background-color: #f1f5f9;
             padding: 3px 8px;
@@ -174,6 +183,43 @@
             font-size: 15px;
             color: #b91c1c;
             border: 1px solid #e2e8f0;
+        }
+
+        /* ========================================= */
+        /* МОБИЛЬНАЯ АДАПТАЦИЯ И РЕЖИМ ТЕСТА         */
+        /* ========================================= */
+
+        /* На мобильных делаем на весь экран */
+        @media (max-width: 768px) {
+            #chat-container {
+                width: 100%;
+                height: 100dvh;
+                max-height: none;
+                border-radius: 0;
+                border: none;
+            }
+            #chat-header {
+                border-radius: 0;
+                padding: 15px 20px;
+            }
+            #chat-box {
+                padding: 15px;
+            }
+            #buttons-container {
+                padding: 15px;
+            }
+        }
+
+        /* Класс для режима тестирования (на весь экран) */
+        body.quiz-active #chat-container {
+            max-height: 100dvh;
+            height: 100dvh;
+            border-radius: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+        body.quiz-active #chat-header {
+            display: none; /* Скрываем шапку в тесте */
         }
     </style>
 </head>
@@ -188,7 +234,6 @@
 </div>
 
 <script>
-    // --- БАЗА ССЫЛОК ---
     const BASE_URL = "https://github.com/Tsehoshsofia/bot_tsekhosh/blob/main/";
     
     const PRESENTATIONS = {
@@ -212,9 +257,8 @@
         { q: "Какой метод удалит пробелы в начале и в конце строки?", opts: ["split()", "strip()", "replace()"], correct: 1, exp: "Метод strip() обрезает пробельные символы с обоих концов." }
     ];
 
-    // Убрали регистрацию, начинаем сразу с меню
-    let state = 'menu'; 
-    let userData = { score: 0 };
+    let state = 'role_selection'; 
+    let userData = { role: null, score: 0 };
     let quizIdx = 0;
 
     const chatBox = document.getElementById('chat-box');
@@ -232,7 +276,7 @@
         btnContainer.innerHTML = '';
         buttons.forEach(btn => {
             const b = document.createElement('button');
-            b.className = btn.primary ? 'chat-btn primary' : 'chat-btn';
+            b.className = btn.class || (btn.primary ? 'chat-btn primary' : 'chat-btn');
             b.innerText = btn.text;
             b.onclick = () => handleInput(btn.value, btn.text);
             btnContainer.appendChild(b);
@@ -240,6 +284,7 @@
     }
 
     function showMainMenu() {
+        document.body.classList.remove('quiz-active'); // Выключаем полноэкранный тест
         state = 'menu';
         addMessage("Выберите необходимый раздел для продолжения работы:");
         renderButtons([
@@ -254,9 +299,17 @@
         addMessage(text, 'user');
         btnContainer.innerHTML = ''; 
 
-        // Убрали задержку setTimeout для мгновенного отклика
-        if (value === 'menu') {
-            addMessage("Возврат в главное меню.");
+        if (state === 'role_selection') {
+            if (value === 'student') {
+                userData.role = 'Студент';
+                addMessage("Отлично! Я помогу тебе освоить Python и подготовиться к сессии. Выбери, с чего хочешь начать:");
+            } else {
+                userData.role = 'Преподаватель';
+                addMessage("Здравствуйте! Готова помочь вам с проверкой знаний студентов и предоставлением материалов.");
+            }
+            showMainMenu();
+        }
+        else if (value === 'menu') {
             showMainMenu();
         }
         else if (value === 'presentations') {
@@ -276,13 +329,14 @@
             renderButtons([{text: "⬅️ Назад к темам", value: "presentations"}]);
         }
         else if (value === 'start_quiz') {
+            document.body.classList.add('quiz-active'); // Включаем полноэкранный тест
             state = 'quiz';
             quizIdx = 0;
             userData.score = 0;
+            addMessage("🚀 <b>Режим тестирования запущен!</b><br>Отвечайте на вопросы, чтобы проверить свои знания.");
             askQuiz();
         }
         else if (state === 'quiz') {
-            // Проверяем, что нажата кнопка с ответом (число)
             if (isNaN(parseInt(value))) return; 
 
             const isCorrect = parseInt(value) === QUIZ[quizIdx].correct;
@@ -292,10 +346,10 @@
             quizIdx++;
             
             if (quizIdx >= QUIZ.length) {
-                addMessage(`Тестирование завершено. Ваш результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
+                addMessage(`🎉 Тестирование завершено!<br>Ваш результат: <b>${userData.score} из ${QUIZ.length}</b>.`);
                 showMainMenu();
             } else {
-                askQuiz(); // Сразу задаем следующий вопрос
+                askQuiz(); 
             }
         }
         else if (value === 'start_quest') {
@@ -304,7 +358,7 @@
             renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
         }
         else if (value === 'analytics') {
-            addMessage(`📊 <b>Статистика:</b><br>Правильных ответов в тесте: ${userData.score}`);
+            addMessage(`📊 <b>Статистика:</b><br>Роль: ${userData.role}<br>Правильных ответов в тесте: ${userData.score}`);
             const percent = (userData.score / QUIZ.length) * 100;
             addMessage(`<div style="background:#e2e8f0; border-radius:4px; width:100%; height:8px; margin-top:5px;"><div style="background:var(--accent-blue); width:${percent}%; height:100%; border-radius:4px; transition: width 1s;"></div></div>`);
             renderButtons([{text: "⬅️ В меню", value: "menu", primary: true}]);
@@ -313,13 +367,21 @@
 
     function askQuiz() {
         addMessage(`<b>Вопрос ${quizIdx + 1} из ${QUIZ.length}:</b><br><br>${QUIZ[quizIdx].q}`);
-        renderButtons(QUIZ[quizIdx].opts.map((opt, i) => ({text: opt, value: i})));
+        
+        let btns = QUIZ[quizIdx].opts.map((opt, i) => ({text: opt, value: i}));
+        // Добавляем кнопку выхода из теста
+        btns.push({text: "❌ Прервать тестирование", value: "menu", class: "chat-btn danger"});
+        
+        renderButtons(btns);
     }
 
     // --- СТАРТ ---
     window.onload = () => {
-        addMessage("Здравствуйте. Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>. Я помогу тебе разобраться с типами данных в Python.<br><br>С чего начнем?");
-        showMainMenu();
+        addMessage("Здравствуйте. Меня зовут София, я преподаватель дисциплины <b>«Основы программирования»</b>.<br><br>Для начала давайте определимся, кто вы:");
+        renderButtons([
+            {text: "🎓 Я студент 1 курса", value: "student", primary: true},
+            {text: "👨‍🏫 Я преподаватель", value: "teacher"}
+        ]);
     };
 </script>
 </body>
